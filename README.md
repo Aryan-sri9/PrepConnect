@@ -2,7 +2,7 @@
 
 *Empowering Students with Disaster Preparedness* 🚨📘  
 
-PrepConnect is a website designed *specifically for students, created by the joint efforts of [@Bhavya080507](https://github.com/Bhavya080507), [@Aryan-sri9](https://github.com/Aryan-sri9), [@vaibhav025](https://github.com/vaibhav025),  [@RohanGarg1818](https://github.com/RohanGarg1818),[@Monit03](https://github.com/Monit03).  
+PrepConnect is a website designed specifically for students, created by the joint efforts of [@Bhavya080507](https://github.com/Bhavya080507), [@Aryan-sri9](https://github.com/Aryan-sri9), [@vaibhav025](https://github.com/vaibhav025),  [@RohanGarg1818](https://github.com/RohanGarg1818),[@Monit03](https://github.com/Monit03).  
 
 Our mission is simple: *make disaster management education interactive, engaging, and accessible to students everywhere.*  
 
