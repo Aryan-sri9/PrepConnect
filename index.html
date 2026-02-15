@@ -30,6 +30,38 @@
         🆘 HELP
     </button>
 
+    <button class="chat-toggle-btn" onclick="toggleChat()">
+        🤖  Assistant
+    </button>
+
+    <div id="chat-widget" class="chat-widget">
+        <div class="chat-header">
+            <div class="chat-title">
+                <span>🤖 PrepBot </span>
+                <span class="online-dot"></span>
+            </div>
+            <div class="chat-controls">
+                <select id="chat-lang" onchange="changeChatLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="pa">ਪੰਜਾਬੀ</option>
+                </select>
+                <span class="close-chat" onclick="toggleChat()">&times;</span>
+            </div>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            </div>
+        
+        <div id="typing-indicator" class="typing-indicator" style="display:none;">
+            <span>●</span><span>●</span><span>●</span>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask anything..." onkeypress="handleChatKey(event)">
+            <button onclick="sendChatMessage()">➤</button>
+        </div>
+    </div>
+
     <section id="home" class="section active">
         <div class="container">
             <div class="hero">
@@ -111,7 +143,6 @@
             <span class="close" onclick="closeProfile()">&times;</span>
             <h2>My Safety Profile</h2>
             <p>Help neighbors understand how to assist you in an emergency.</p>
-            
             <label for="mobility-status">Assistance Requirement:</label>
             <select id="mobility-status" class="profile-select">
                 <option value="none">None / Able-bodied</option>
@@ -121,7 +152,6 @@
                 <option value="elderly">Elderly (Need Mobility Support)</option>
                 <option value="medical">Requires Medical Equipment (Power/Oxygen)</option>
             </select>
-
             <button class="btn-primary" onclick="saveProfile()">Save Profile</button>
         </div>
     </div>
