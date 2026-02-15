@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Preparedness Education System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logodiv">
+                <div class="logophoto">
+                <img src="LOGO.png" class="designedlogo">
+                </div>
+                <div class="apptitle">
+                   <h1>&nbsp;&nbsp;PrepConnect</h1>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#modules" class="nav-link">Learn</a></li>
+                <li><a href="#quiz" class="nav-link">Quiz</a></li>
+                <li><a href="#drills" class="nav-link">Drills</a></li>
+                <li><a href="#emergency" class="nav-link">Emergency</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home" class="section active">
+        <div class="container">
+            <div class="hero">
+                <h2>Welcome to PrepConnect
+                    
+                </h2>
+                <p>Learn, Practice, and Stay Safe</p>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3 id="modules-completed">0</h3>
+                        <p>Modules Completed</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="quiz-score">0%</h3>
+                        <p>Quiz Average</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="drills-completed">0</h3>
+                        <p>Drills Practiced</p>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="showSection('modules')">Start Learning</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Modules Section -->
+    <section id="modules" class="section">
+        <div class="container">
+            <h2>Disaster Education Modules</h2>
+            <div class="modules-grid">
+                <div class="module-card" onclick="openModule('earthquake')">
+                    <div class="module-icon">🌍</div>
+                    <h3>Earthquake Safety</h3>
+                    <p>Learn how to protect yourself during earthquakes</p>
+                    <span class="module-status" id="earthquake-status">Not Started</span>
+                </div>
+                <div class="module-card" onclick="openModule('flood')">
+                    <div class="module-icon">🌊</div>
+                    <h3>Flood Response</h3>
+                    <p>Understanding flood risks and safety measures</p>
+                    <span class="module-status" id="flood-status">Not Started</span>
+                </div>
+                <div class="module-card" onclick="openModule('fire')">
+                    <div class="module-icon">🔥</div>
+                    <h3>Fire Safety</h3>
+                    <p>Fire prevention and evacuation procedures</p>
+                    <span class="module-status" id="fire-status">Not Started</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Module Content Viewer -->
+    <div id="module-viewer" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModule()">&times;</span>
+            <div id="module-content"></div>
+            <button class="btn-primary" onclick="completeModule()">Mark as Complete</button>
+        </div>
+    </div>
+
+    <!-- Quiz Section with Levels -->
+    <section id="quiz" class="section">
+        <div class="container">
+            <h2>Test Your Knowledge</h2>
+            <div class="quiz-levels">
+                <div class="level-selector">
+                    <button class="level-btn active" onclick="selectLevel(1)" id="level-1">
+                        Level 1<br>
+                        <small>Basic</small>
+                    </button>
+                    <button class="level-btn" onclick="selectLevel(2)" id="level-2">
+                        Level 2<br>
+                        <small>Intermediate</small>
+                    </button>
+                    <button class="level-btn" onclick="selectLevel(3)" id="level-3">
+                        Level 3<br>
+                        <small>Advanced</small>
+                    </button>
+                </div>
+                <div class="quiz-container">
+                    <div id="quiz-intro" class="quiz-content">
+                        <h3>Quiz Level <span id="current-level">1</span></h3>
+                        <p>Test your disaster preparedness knowledge!</p>
+                        <p class="level-description">Level 1: Basic safety concepts and emergency procedures</p>
+                        <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+                    </div>
+                    <div id="quiz-questions" class="quiz-content" style="display: none;">
+                        <div class="quiz-header">
+                            <span>Question <span id="question-number">1</span> of <span id="total-questions">5</span></span>
+                            <span>Score: <span id="current-score">0</span></span>
+                        </div>
+                        <h3 id="question-text"></h3>
+                        <div id="answer-options" class="answer-options"></div>
+                        <button class="btn-primary" id="next-btn" onclick="nextQuestion()" style="display: none;">Next</button>
+                    </div>
+                    <div id="quiz-results" class="quiz-content" style="display: none;">
+                        <h3>Quiz Complete!</h3>
+                        <div class="result-circle">
+                            <span id="final-score">0%</span>
+                        </div>
+                        <p id="result-message"></p>
+                        <div class="result-actions">
+                            <button class="btn-primary" onclick="retryQuiz()">Try Again</button>
+                            <button class="btn-secondary" onclick="nextLevel()">Next Level</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Virtual Drills Section -->
+    <section id="drills" class="section">
+        <div class="container">
+            <h2>Virtual Emergency Drills</h2>
+            <div class="drills-grid">
+                <div class="drill-card" onclick="startDrill('earthquake')">
+                    <h3>🌍 Earthquake Drill</h3>
+                    <p>Practice Drop, Cover, and Hold On</p>
+                    <button class="btn-secondary">Start Drill</button>
+                </div>
+                <div class="drill-card" onclick="startDrill('fire')">
+                    <h3>🔥 Fire Evacuation</h3>
+                    <p>Learn evacuation routes and procedures</p>
+                    <button class="btn-secondary">Start Drill</button>
+                </div>
+                <div class="drill-card" onclick="startDrill('flood')">
+                    <h3>🌊 Flood Response</h3>
+                    <p>Practice flood safety protocols</p>
+                    <button class="btn-secondary">Start Drill</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Drill Simulator -->
+    <div id="drill-simulator" class="modal">
+        <div class="modal-content drill-content">
+            <span class="close" onclick="closeDrill()">&times;</span>
+            <h2 id="drill-title"></h2>
+            <div id="drill-scenario"></div>
+            <div id="drill-timer" class="drill-timer">Time: <span id="timer-display">00:00</span></div>
+            <div id="drill-actions" class="drill-actions"></div>
+            <button class="btn-primary" onclick="completeDrill()">Complete Drill</button>
+        </div>
+    </div>
+
+    <!-- Emergency Contacts Section -->
+    <section id="emergency" class="section">
+        <div class="container">
+            <h2>Emergency Contacts</h2>
+            <div class="alert-banner">
+                <p>⚠️ In case of emergency, remain calm and contact appropriate services</p>
+            </div>
+            <div class="contacts-grid">
+                <div class="contact-card">
+                    <h3>🚒 Fire Department</h3>
+                    <p class="emergency-number">101</p>
+                    <button class="btn-call" onclick="copyNumber('101')">Copy Number</button>
+                </div>
+                <div class="contact-card">
+                    <h3>🚑 Medical Emergency</h3>
+                    <p class="emergency-number">108</p>
+                    <button class="btn-call" onclick="copyNumber('108')">Copy Number</button>
+                </div>
+                <div class="contact-card">
+                    <h3>👮 Police</h3>
+                    <p class="emergency-number">100</p>
+                    <button class="btn-call" onclick="copyNumber('100')">Copy Number</button>
+                </div>
+                <div class="contact-card">
+                    <h3>🆘 Disaster Management</h3>
+                    <p class="emergency-number">1070</p>
+                    <button class="btn-call" onclick="copyNumber('1070')">Copy Number</button>
+                </div>
+                <div class="contact-card">
+                    <h3>👶 Child Helpline</h3>
+                    <p class="emergency-number">1098</p>
+                    <button class="btn-call" onclick="copyNumber('1098')">Copy Number</button>
+                </div>
+                <div class="contact-card">
+                    <h3>👩 Women Helpline</h3>
+                    <p class="emergency-number">1091</p>
+                    <button class="btn-call" onclick="copyNumber('1091')">Copy Number</button>
+                </div>
+            </div>
+            <div class="regional-info">
+                <h3>Regional Emergency Information</h3>
+                <select id="region-select" onchange="updateRegionalInfo()">
+                    <option value="">Select Your State</option>
+                    <option value="punjab">Punjab</option>
+                    <option value="delhi">Delhi</option>
+                    <option value="maharashtra">Maharashtra</option>
+                    <option value="gujarat">Gujarat</option>
+                    <option value="karnataka">Karnataka</option>
+                    <option value="haryana">haryana</option>
+                </select>
+                <div id="regional-contacts" class="regional-contacts"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
