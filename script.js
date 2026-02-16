@@ -77,9 +77,13 @@ const localKnowledgeBase = {
     "snake": { text: "Keep the person calm and still. Do not suck out venom. Transport to hospital immediately." },
     "fracture": { text: "Immobilize the injured area. Do not try to realign the bone. Apply ice packs." },
     "hello": { text: "Hello! I am PrepBot. How can I assist you with safety today?" },
-    "hi": { text: "Hi there! Stay safe. What do you need help with?" },
+    //"hi": { text: "Hi there! Stay safe. What do you need help with?" },
     "thank": { text: "You're welcome! Stay safe." },
-    "bye": { text: "Goodbye! Stay prepared." }
+    "bye": { text: "Goodbye! Stay prepared." },
+    "delhi" : { text: "The emergency contact of Delhi SDMA is 1077.", action: "Call 1077", link: "1077"},
+    "karnataka" : { text: "The emergency contact of Karnataka SDMA is 080-22340676",  action: "Call 080-22340676", link: "080-22340676"},
+    "haryana" : { text: "The emergency contact of Haryana SDMA is 1070.",  action: "Call 1070", link: "1070"},
+    "maharashtra" : { text: "The emergency contact of Delhi SDMA is 1916."},
 };
 
 const greetings = {
