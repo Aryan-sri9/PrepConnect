@@ -3,8 +3,6 @@
 /* =========================================
    USER CONFIGURATION
    ========================================= */
-// OPTIONAL: Paste your Gemini API Key here to enable real AI.
-// If left empty, the system uses "Smart Local Mode" + "Search Fallback".
 const GEMINI_API_KEY = ""; 
 
 // State management
@@ -16,6 +14,10 @@ const state = {
     chatOpen: false,
     chatLang: 'en',
     currentModule: null,
+    currentQuiz: null, // Added missing state
+    currentLevel: 1,   // Added missing state
+    quizIndex: 0,      // Added missing state
+    score: 0           // Added missing state
 };
 
 function saveState() {
@@ -59,7 +61,6 @@ window.addEventListener('DOMContentLoaded', () => {
    SMART AI CHATBOT LOGIC
    ========================================= */
 
-// Massive Local Database for Disaster Topics (Fallback when no API)
 const localKnowledgeBase = {
     "earthquake": { text: "For Earthquakes: Drop, Cover, and Hold On. Stay away from windows. If outside, find an open area.", action: "Start Drill", link: "earthquake" },
     "flood": { text: "For Floods: Move to higher ground immediately. Do not walk or drive through floodwaters.", action: "Learn More", link: "flood" },
@@ -113,21 +114,17 @@ async function sendChatMessage() {
     addChatMessage('user', text);
     input.value = '';
     
-    // Show typing indicator
     document.getElementById('typing-indicator').style.display = 'block';
     const messagesDiv = document.getElementById('chat-messages');
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    // DECISION: Use Real AI or Local Logic?
     if (GEMINI_API_KEY) {
         await callGeminiAI(text);
     } else {
-        // Simulate thinking delay for realism
         setTimeout(() => handleLocalResponse(text.toLowerCase()), 1000);
     }
 }
 
-// 1. REAL AI HANDLER (If Key provided)
 async function callGeminiAI(prompt) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
     const payload = { contents: [{ parts: [{ text: "You are a helpful disaster management assistant. Answer briefly: " + prompt }] }] };
@@ -150,17 +147,12 @@ async function callGeminiAI(prompt) {
     }
 }
 
-// 2. LOCAL INTELLIGENT HANDLER (Fallback)
 function handleLocalResponse(text) {
     document.getElementById('typing-indicator').style.display = 'none';
-    
-    // Fuzzy Matching Logic
     let bestMatch = null;
-    let maxScore = 0;
 
     for (const key in localKnowledgeBase) {
         if (text.includes(key)) {
-            // Exact keyword hit
             bestMatch = localKnowledgeBase[key];
             break;
         }
@@ -169,7 +161,6 @@ function handleLocalResponse(text) {
     if (bestMatch) {
         addChatMessage('bot', bestMatch.text, bestMatch.action, bestMatch.link);
     } else {
-        // If unknown, generate a Google Search link
         const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(text)}`;
         addChatMessage('bot', "I am currently trained for disaster topics, but I can help you find that on Google.", "Search Google", searchUrl);
     }
@@ -207,7 +198,6 @@ function handleChatAction(link) {
         showSection('drills');
         if (window.innerWidth < 768) toggleChat();
     } else {
-        // Assume module
         showSection('modules');
         openModule(link);
         if (window.innerWidth < 768) toggleChat();
@@ -301,7 +291,7 @@ function closeSOS() {
 }
 
 /* =========================================
-   STANDARD MODULES, QUIZ & UTILS
+   STANDARD MODULES
    ========================================= */
 const MODULE_CONTENT = {
     earthquake: `<h2>Earthquake Safety</h2><p>Drop, Cover, and Hold On. Stay away from windows.</p><h3>Before</h3><ul><li>Secure furniture</li><li>Prepare kit</li></ul>`,
@@ -355,19 +345,329 @@ function updateStats() {
     document.getElementById('drills-completed').textContent = String(state.drillsCompleted);
 }
 
-// Simple Quiz & Drill
-const QUIZ_BANK = { 1: [{ q: 'Earthquake action?', options: ['Run', 'Drop, Cover, Hold', 'Scream'], a: 1 }] };
-function startQuiz() { alert("Starting Quiz..."); } // Simplified for brevity in this turn
-function startDrill(type) { alert(`Starting ${type} drill...`); state.drillsCompleted++; saveState(); updateStats(); }
+/* =========================================
+   FULL QUIZ SYSTEM
+   ========================================= */
+
+const QUIZ_BANK = {
+    1: [
+        { q: 'What should you do during an earthquake?', options: ['Run outside', 'Drop, Cover, and Hold On', 'Stand near windows', 'Scream'], a: 1 },
+        { q: 'The emergency number for fire service in India is:', options: ['102', '108', '101', '112'], a: 2 },
+        { q: 'In a flood, you should:', options: ['Drive through water', 'Swim', 'Move to higher ground', 'Ignore alerts'], a: 2 },
+        { q: 'For small burns, first:', options: ['Apply ice', 'Cool with running water', 'Pop blisters', 'Apply butter'], a: 1 },
+        { q: 'Best place during earthquake indoors:', options: ['Under sturdy table', 'Doorway', 'Balcony', 'Near glass'], a: 0 },
+    ],
+    2: [
+        { q: 'If clothes catch fire, you should:', options: ['Run fast', 'Stop, Drop, and Roll', 'Jump into bed', 'Wave arms'], a: 1 },
+        { q: 'Emergency kit should include:', options: ['Food only', 'Water, torch, first aid', 'Games', 'Only documents'], a: 1 },
+        { q: 'During earthquake at school, first action is to:', options: ['Run home', 'Call parents', 'Drop, Cover, Hold', 'Go to roof'], a: 2 },
+        { q: 'In floods, electricals should be:', options: ['Ignored', 'Elevated/disconnected', 'Submerged', 'Touched wet'], a: 1 },
+        { q: 'Smoke in corridor, you should:', options: ['Crawl low', 'Walk upright', 'Use lift', 'Hide'], a: 0 },
+    ],
+    3: [
+        { q: 'Post-earthquake, priority is:', options: ['Selfies', 'Check injuries/hazards', 'Sleep', 'Looting'], a: 1 },
+        { q: 'If trapped under debris:', options: ['Shout continuously', 'Kick dust', 'Tap on pipe/wall', 'Light match'], a: 2 },
+        { q: 'NDMA stands for:', options: ['National Disaster Management Authority', 'New Delhi Medical Agency', 'None', 'National Department'], a: 0 },
+        { q: 'Flood water 15 cm deep can:', options: ['Be safe', 'Sweep you off feet', 'Clean roads', 'None'], a: 1 },
+        { q: 'Fire assembly area should be:', options: ['Lobby', 'Open, upwind area', 'Basement', 'Roof'], a: 1 },
+    ],
+};
+
+function selectLevel(level) {
+    state.currentLevel = level;
+    // Update UI text
+    if(document.getElementById('current-level')) 
+        document.getElementById('current-level').textContent = String(level);
+    
+    // Highlight button
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById(`level-${level}`);
+    if(btn) btn.classList.add('active');
+
+    // Show Intro, Hide Questions/Results
+    document.getElementById('quiz-intro').style.display = 'block';
+    document.getElementById('quiz-questions').style.display = 'none';
+    document.getElementById('quiz-results').style.display = 'none';
+}
+
+function startQuiz() {
+    // Shuffle and pick questions for current level
+    const questions = QUIZ_BANK[state.currentLevel] || QUIZ_BANK[1];
+    state.currentQuiz = questions.sort(() => Math.random() - 0.5);
+    state.quizIndex = 0;
+    state.score = 0;
+
+    // Switch Views
+    document.getElementById('quiz-intro').style.display = 'none';
+    document.getElementById('quiz-questions').style.display = 'block';
+    document.getElementById('quiz-results').style.display = 'none';
+    
+    renderQuestion();
+}
+
+function renderQuestion() {
+    const q = state.currentQuiz[state.quizIndex];
+    
+    document.getElementById('question-number').textContent = state.quizIndex + 1;
+    document.getElementById('current-score').textContent = state.score;
+    document.getElementById('question-text').textContent = q.q;
+    
+    const options = document.getElementById('answer-options');
+    options.innerHTML = '';
+    
+    q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-option';
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(btn, idx, q.a);
+        options.appendChild(btn);
+    });
+    
+    document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(btn, idx, correct) {
+    // Disable all buttons
+    document.querySelectorAll('.answer-option').forEach(b => {
+        b.onclick = null;
+        b.style.cursor = 'default';
+    });
+
+    if (idx === correct) {
+        btn.classList.add('correct');
+        state.score++;
+    } else {
+        btn.classList.add('incorrect');
+        // Highlight the correct one too
+        const allBtns = document.querySelectorAll('.answer-option');
+        if(allBtns[correct]) allBtns[correct].classList.add('correct');
+    }
+    
+    document.getElementById('current-score').textContent = state.score;
+    document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+    if (state.quizIndex < state.currentQuiz.length - 1) {
+        state.quizIndex++;
+        renderQuestion();
+    } else {
+        finishQuiz();
+    }
+}
+
+function finishQuiz() {
+    const percent = Math.round((state.score / state.currentQuiz.length) * 100);
+    
+    document.getElementById('quiz-questions').style.display = 'none';
+    document.getElementById('quiz-results').style.display = 'block';
+    
+    document.getElementById('final-score').textContent = `${percent}%`;
+    
+    const passed = percent >= 70;
+    document.getElementById('result-message').textContent = passed 
+        ? 'Great job! You passed this level.' 
+        : 'Keep practicing. Try again!';
+
+    // Save Score
+    state.quiz.scores[state.currentLevel] = percent;
+    
+    // Unlock next level if passed
+    if (passed && state.currentLevel < 3) {
+        state.quiz.level = Math.max(state.quiz.level || 1, state.currentLevel + 1);
+    }
+    
+    saveState();
+    updateLevelButtons();
+    updateStats();
+}
+
+function retryQuiz() { 
+    selectLevel(state.currentLevel); 
+}
+
+function nextLevel() { 
+    const next = Math.min(3, state.currentLevel + 1);
+    selectLevel(next); 
+}
+
+function updateLevelButtons() {
+    const unlocked = state.quiz.level || 1;
+    [1, 2, 3].forEach(lvl => {
+        const btn = document.getElementById(`level-${lvl}`);
+        if(btn) {
+            btn.disabled = lvl > unlocked;
+            if (lvl <= unlocked) btn.classList.add('unlocked');
+            else btn.classList.remove('unlocked');
+        }
+    });
+}
+
+/* =========================================
+   FULL DRILL SYSTEM
+   ========================================= */
+
+function startDrill(type) {
+    const titles = { 
+        earthquake: 'Earthquake Drill', 
+        fire: 'Fire Evacuation Drill', 
+        flood: 'Flood Response Drill' 
+    };
+    
+    const steps = {
+        earthquake: [
+            'Drop under a sturdy desk',
+            'Cover your head and neck',
+            'Hold on until shaking stops',
+            'Evacuate calmly when instructed',
+        ],
+        fire: [
+            'Raise the alarm and alert others',
+            'Use stairs, avoid elevators',
+            'Stay low to avoid smoke',
+            'Assemble at the designated area',
+        ],
+        flood: [
+            'Move to higher ground',
+            'Turn off electricity if safe',
+            'Avoid walking/driving through water',
+            'Listen to official updates',
+        ],
+    };
+
+    // Set Title
+    document.getElementById('drill-title').textContent = titles[type];
+    
+    // Set Instructions
+    const scenario = document.getElementById('drill-scenario');
+    scenario.innerHTML = `<p>Click each step below as you "perform" it:</p>`;
+
+    // Build Checklist
+    const actions = document.getElementById('drill-actions');
+    actions.innerHTML = '';
+    
+    if (steps[type]) {
+        steps[type].forEach((step, idx) => {
+            const div = document.createElement('div');
+            div.className = 'drill-action';
+            div.textContent = `${idx + 1}. ${step}`;
+            div.onclick = function() { this.classList.toggle('completed'); };
+            actions.appendChild(div);
+        });
+    }
+
+    // Show Modal
+    const modal = document.getElementById('drill-simulator');
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('show'), 10);
+
+    // Start Timer
+    startTimer();
+}
+
+function closeDrill() {
+    stopTimer();
+    const modal = document.getElementById('drill-simulator');
+    modal.classList.remove('show');
+    setTimeout(() => modal.style.display = 'none', 300);
+}
+
+function completeDrill() {
+    // Validation: Check if all steps are completed
+    const actions = document.querySelectorAll('.drill-action');
+    const completed = document.querySelectorAll('.drill-action.completed');
+    
+    if (completed.length < actions.length) {
+        toast(`Please complete all ${actions.length} steps first!`);
+        return;
+    }
+
+    stopTimer();
+    state.drillsCompleted += 1;
+    saveState();
+    updateStats();
+    closeDrill();
+    toast('Drill Passed Successfully!');
+}
+
+function startTimer() {
+    // Reset if running
+    stopTimer();
+    
+    state.timerStart = Date.now();
+    const el = document.getElementById('timer-display');
+    
+    state.timer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - state.timerStart) / 1000);
+        const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const ss = String(elapsed % 60).padStart(2, '0');
+        if(el) el.textContent = `${mm}:${ss}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    if (state.timer) clearInterval(state.timer);
+    state.timer = null;
+    state.timerStart = null;
+    const el = document.getElementById('timer-display');
+    if(el) el.textContent = '00:00';
+}
 
 function copyNumber(num) {
     navigator.clipboard.writeText(num).then(() => toast(`Copied ${num}`));
 }
 
 function updateRegionalInfo() {
-    // Basic mapping, expanded in full version
+    const mapping = {
+        punjab: [
+            { name: 'Punjab SDMA', number: '0172-2740274' },
+            { name: 'Punjab Police Helpline', number: '112' },
+        ],
+        delhi: [
+            { name: 'Delhi SDMA', number: '1077' },
+            { name: 'Delhi Police', number: '112' },
+        ],
+        maharashtra: [
+            { name: 'Maharashtra SDMA', number: '022-22027990' },
+            { name: 'Mumbai Disaster Control', number: '1916' },
+        ],
+        gujarat: [
+            { name: 'Gujarat SDMA', number: '079-23259224' },
+            { name: 'Ahmedabad Control Room', number: '079-26424000' },
+        ],
+        karnataka: [
+            { name: 'Karnataka SDMA', number: '080-22340676' },
+            { name: 'Bengaluru Control Room', number: '080-22943225' },
+        ],
+        haryana: [
+            { name: 'Haryana SDMA', number: '0172-2740397' },
+            { name: 'State Control Room', number: '1070' },
+        ]
+    };
+
+    const selector = document.getElementById('region-select');
+    const region = selector.value.toLowerCase(); // Ensure case insensitivity
+    const list = mapping[region] || [];
     const container = document.getElementById('regional-contacts');
-    container.innerHTML = '<p>Contact info updated for selected region.</p>';
+    
+    // Clear previous results
+    container.innerHTML = '';
+
+    if (!list.length) {
+        container.innerHTML = '<p>Select your state to view contacts.</p>';
+        return;
+    }
+    
+    // Create new elements safely
+    const fragment = document.createDocumentFragment();
+    list.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'contact-row';
+        div.style.marginBottom = '10px';
+        div.innerHTML = `<strong>${item.name}:</strong> ${item.number} <button class="btn-call" style="margin-left:10px; padding:2px 8px;" onclick="copyNumber('${item.number}')">Copy</button>`;
+        fragment.appendChild(div);
+    });
+    container.appendChild(fragment);
 }
 
 function toast(msg) {
@@ -395,9 +695,9 @@ window.toggleChat = toggleChat;
 window.changeChatLanguage = changeChatLanguage;
 window.sendChatMessage = sendChatMessage;
 window.handleChatKey = handleChatKey;
-window.completeDrill = () => { closeModule(); }; // Mock for simplicity
-window.closeDrill = () => { document.getElementById('drill-simulator').style.display='none'; };
-window.retryQuiz = () => {}; 
-window.nextLevel = () => {};
-window.nextQuestion = () => {};
-window.selectLevel = () => {};
+window.completeDrill = completeDrill;
+window.closeDrill = closeDrill;
+window.retryQuiz = retryQuiz;
+window.nextLevel = nextLevel;
+window.nextQuestion = nextQuestion;
+window.selectLevel = selectLevel;
