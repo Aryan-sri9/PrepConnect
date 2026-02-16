@@ -401,3 +401,24 @@ window.retryQuiz = () => {};
 window.nextLevel = () => {};
 window.nextQuestion = () => {};
 window.selectLevel = () => {};
+
+// ===== NAVIGATION FIX =====
+document.querySelectorAll(".nav-link").forEach(link => {
+    link.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const targetId = this.getAttribute("href").substring(1);
+        showSection(targetId);
+    });
+});
+
+function showSection(sectionId) {
+    document.querySelectorAll(".section").forEach(section => {
+        section.classList.remove("active");
+    });
+
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add("active");
+    }
+}
